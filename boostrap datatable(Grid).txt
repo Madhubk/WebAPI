@@ -1,0 +1,225 @@
+boostrap datatable (Grid)
+
+view side:
+
+
+@model IEnumerable<EAuction_ViewModel.ViewModel.PropertyListingViewModel>
+
+@{
+    ViewBag.Title = "ApproveEMD";
+   
+}
+
+<div class="container">
+    <table id="approveEMDTbl" class="dataTable row-border">
+        <thead>
+            <tr>
+                <th>Action</th>
+                <th>Auction ID</th>
+                <th>Asset Name</th>
+                <th>Borrower Name</th>
+                <th>Address</th>
+                <th>Auction Date</th>
+                <th>Reserve Price</th>
+                <th>EMD Amount</th>                
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var i in Model)
+            {
+                <tr>
+                    <td>
+                        <a class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="right" title="View Bidder EMD Details" onclick="ViewBiderEMDDetails(@i.PropertyID)"><i class="fa fa-external-link fa-fw"></i></a>
+                        
+                    </td>
+                    <td>@i.PropertyID</td>
+                    <td>@i.AssetName</td>
+                    <td>@i.BorrowerName</td>
+                    <td>@i.Address</td>
+                    <td>@Convert.ToDateTime(i.AuctionDate).ToString("dd-MMM-yyy")</td>
+                    <td>
+                       <i class="fa fa-inr" aria-hidden="true"></i> @String.Format(Indian, "{0:N}", @i.ReservePrice)
+                    </td>
+                    <td><i class="fa fa-inr" aria-hidden="true"></i> @String.Format(Indian, "{0:N}", @i.EMDAmount)</td>
+                    
+                </tr>
+                @*<tr>
+                        <td colspan="6" class="hiddenRow">
+                            <div class="accordion-body collapse well" id="@i.RefID">
+                                @i.AssetName <br />
+                                <br /> @i.BorrowerName <br />
+                            </div>
+                        </td>
+                    </tr>*@
+            }
+        </tbody>
+    </table>
+   <input type="hidden" id="propertyid" />    
+</div>
+
+
+
+Script:
+
+ <script>
+        $(document).ready(function () {
+            var table = $('#approveEMDTbl').DataTable({
+                autoWidth: false, //<---
+                responsive: true,
+                "bLengthChange": true,
+                "bFilter": true,
+                "bInfo": false,
+                "sPaginationType": "full_numbers",
+
+            });
+			</script>
+			
+			
+			DAL Layer:
+			
+			 public List<PropertyListingViewModel> getApproveEmdProperty(int UserRefID)
+        {
+            List<PropertyListingViewModel> propList = new List<PropertyListingViewModel>();
+            try
+            {
+                using (var dbcontext = new EAuc_Context())
+                {
+                    var UserRefIDParam = new SqlParameter { ParameterName = "UserRefID", Value = UserRefID };
+                    propList = dbcontext.Database.SqlQuery<PropertyListingViewModel>("CLI_GET_PropertyDetails_LastSubmissionDate @UserRefID", UserRefIDParam).ToList();
+
+                }
+                return propList;
+            }
+            catch (Exception ex)
+            {
+
+                Logger.UserError("CLI_GET_PropertyDetails_LastSubmissionDate", ex);
+                throw ex;
+            }
+
+        }
+		
+		Controller:
+		
+		
+		public ActionResult ApproveEMD()
+      {
+          AdminLoginViewModel sd = (AdminLoginViewModel)Session["AdminloginData"];
+
+          var li = _AuctionProvider.getApproveEmdProperty(sd.UserRefID);
+          return View(li);
+      }
+	  
+	  
+	  
+	  viewModel:
+	  
+	  
+	  public class PropertyListingViewModel
+    {
+        public int CreatedBy { get; set; }
+        public int BankID { get; set; }
+        public int CityID { get; set; }
+        public Int64 BankRefID { get; set; }
+        public long PropertyID { get; set; } 
+        public int PTypeID { get; set; }
+        public int UserRefID { get; set; }
+        public string PropertyTypeDesc { get; set; }
+        public int AvailStatus { get; set; }
+        public string BankName { get; set; }
+        public string CityDesc { get; set; }
+        public string Location { get; set; }
+        public string AssetName { get; set; }
+        public int Weight { get; set; }
+        public string BankPropertyID { get; set; }
+        public string BorrowerName { get; set; }
+
+        public decimal ReservePrice { get; set; }
+        public decimal EMDAmount { get; set; }
+        public string ContactPerson { get; set; }
+        public string DocumentPath { get; set; }
+        public string DocumentPathI { get; set; }
+        public string DocumentPathII { get; set; }
+        public string Info { get; set; }
+        public int? AucAvailStatus { get; set; }
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
+        public DateTime? AuctionDate { get; set; }
+
+        public int? AuctionType { get; set; }
+        public string Logo { get; set; }
+        public int? ViewCount { get; set; }
+        public string Address { get; set; }
+        public string ID { get; set; }
+        public Int16? Status { get; set; }
+        public string Eventtype { get; set; }
+        public int? Eventno { get; set; }
+        public string Nitrefno { get; set; }
+        public decimal? Tenderfee { get; set; }
+        public string Nbankname { get; set; }
+        public string Nbankaccountno { get; set; }
+        public string NbankIfsccode { get; set; }
+        public DateTime? Pressrelasedate { get; set; }
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
+        public DateTime? Inspectionfrmdate { get; set; }
+         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}",ApplyFormatInEditMode = true)]
+        public DateTime? Inspectiontodate { get; set; }
+         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
+        public DateTime? Submissionlastdate { get; set; }
+        [DisplayFormat(DataFormatString = "{0:dd/MMM/yyyy}", ApplyFormatInEditMode = true)]
+        public DateTime? Openningdate { get; set; }
+        public string AuctionTime { get; set; }
+        public string AuctionCloseTime { get; set; }
+        public decimal? BidIncrementvalue { get; set; }
+        public string EventTitle { get; set; }
+        public bool ItemInfo { get; set; }
+        public bool ItemInfo1 { get; set; }
+        public bool ItemInfo2 { get; set; }
+        public string place { get; set; }
+        public int TotalBidder { get; set; }
+        public int AutoExtTime { get; set; }
+        public int NoofAutoExt { get; set; }
+        public int SubmissionlastStatus { get; set; }
+        //public string EventTitle { get; set; }
+        public int AuctionStatus { get; set; }
+        public int EMDStatus { get; set; }
+        public decimal minprice { get; set; }
+        public decimal maxprice { get; set; }
+        public string BranchName { get; set; }
+        public string CategoryName { get; set; }
+        public string subcategoryname { get; set; }
+        public int Bidformsubmittype { get; set; }
+        public int Favouritestatus { get; set; }
+        public int FavouritestatusTypeId { get; set; }
+        
+
+
+
+    }
+
+    public class PropertyfilterViewmodel
+    {
+        public decimal minprice { get; set; }
+        public decimal maxprice { get; set; }
+        public PropertyfilterViewmodel()
+        {
+            list = new List<PropertyListingViewModel>();
+        }
+        public List<PropertyListingViewModel> list { get; set; }
+        public int PtypeID { get; set; }
+        public int FavouritestatusTypeId { get; set; }
+        public int TrendingstatusTypeId { get; set; } 
+        public string City { get; set; }
+        public int TenderID { get; set; }
+       
+        public string Info { get; set; }
+        public string subcategoryname { get; set; }
+    }
+
+
+
+Add the boostrap datatable css and js plugin
+
+add the plugin
+			
+			
