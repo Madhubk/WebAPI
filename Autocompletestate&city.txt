@@ -1,0 +1,132 @@
+state and city Autocomplete:
+
+
+   $("#State").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("AutoSearchstate", "Account")",
+                    dataType: "json",
+                    data: { term: request.term },
+                    error: function (xhr, textStatus, errorThrown) {
+                        alert('Error: ' + xhr.responseText);
+                    },
+                    success: function (data) {
+                        if (data.length == 0) {
+                            bootbox.alert("Sorry, No matching states found for " + request.term);
+                            this.input
+                            $(this).val("");
+                            $('#State').val("");
+                            return;
+                        }
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.Text,
+                                value: item.Text,
+                                valueID: item.Value
+                            }
+                        }));
+                    }
+                });
+            },
+            minLength: 1,
+            select: function (event, ui) {
+                $('#City').show();
+                $('#State').val(ui.item.label);
+                $('#Stateid').val(ui.item.valueID);
+                return false;
+            }
+        });
+        $("#CompCity").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("AutoSearchCity", "Home")",
+                    dataType: "json",
+                    data: { term: request.term, "stateid": $('#CompStateid').val() },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + xhr.responseText);
+                },
+                success: function (data) {
+                    if (data.length == 0) {
+                        //$('#CompCity').addClass("invalid1");
+                        bootbox.alert("Sorry, No matching cities found for " + request.term);
+                        this.input
+                        $(this).val("");
+                        $('#CompCity').val("");
+                        return;
+                    }
+                    response($.map(data, function (item) {
+                        return {
+                            label: item.Text,
+                            value: item.Text,
+                            valueID: item.Value
+                        }
+                    }));
+                }
+            });
+        },
+        minLength: 1,
+        select: function (event, ui) {
+          
+                $('#CompCity').val(ui.item.label);
+                $('#CompCityid').val(ui.item.valueID);
+                return false;
+            }
+        });
+		
+		
+		
+		Controller:
+		
+		
+		 public JsonResult AutoSearchstate(string term)
+        {
+            List<SelectListItem> li = new List<SelectListItem>();
+            using (SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["EAuc_Context"].ToString()))
+            {
+                using (SqlCommand cmd = new SqlCommand("select StateDesc,StateID from MAS_States where StateDesc LIKE  '%'+@SearchText+'%'", con))
+                {
+                    con.Open();
+                    cmd.Parameters.AddWithValue("@SearchText", term);
+                    SqlDataReader dr = cmd.ExecuteReader();
+                    while (dr.Read())
+                    {
+                        //li.Add(string.Format("{0}/{1}", dr["CompanyName"], dr["InvoiceID"]));
+
+                        SelectListItem objCity = new SelectListItem();
+                        objCity.Text = dr["StateDesc"].ToString();
+                        objCity.Value = dr["StateID"].ToString();
+                        li.Add(objCity);
+                    }
+                }
+            }
+            return Json(li, JsonRequestBehavior.AllowGet);
+        }
+		
+		
+		
+		 public JsonResult AutoSearchCity(string term, int stateid)
+        {
+            List<SelectListItem> li = new List<SelectListItem>();
+            using (SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["EAuc_Context"].ToString()))
+            {
+                using (SqlCommand cmd = new SqlCommand("select CityDesc,CityID from MAS_Cities where stateid=" + stateid + "and CityDesc LIKE  '%'+@SearchText+'%'", con))
+                //SELECT Cityid,citydesc FROM MAS_Cities where stateid=2 and citydesc like '%gal%'
+                {
+                    con.Open();
+                    cmd.Parameters.AddWithValue("@SearchText", term);
+                    SqlDataReader dr = cmd.ExecuteReader();
+                    while (dr.Read())
+                    {
+                        //li.Add(string.Format("{0}/{1}", dr["CompanyName"], dr["InvoiceID"]));
+
+                        SelectListItem objCity = new SelectListItem();
+                        objCity.Text = dr["CityDesc"].ToString();
+                        objCity.Value = dr["CityID"].ToString();
+                        li.Add(objCity);
+                    }
+                }
+            }
+            return Json(li, JsonRequestBehavior.AllowGet);
+        }
