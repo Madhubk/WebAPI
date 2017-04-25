@@ -1,7 +1,21 @@
-WebApI POST
+   1) if you Map dataset and response json data Method WebApI POST
 
-
-			   System.Net.WebRequest req = System.Net.WebRequest.Create(URL);
+               System.Net.WebRequest req = System.Net.WebRequest.Create(URL);
+                req.Method = "POST";
+               
+                StreamWriter writer = new StreamWriter(req.GetRequestStream());
+                writer.WriteLine(Data);
+                writer.Flush();
+                writer.Close();
+                WebResponse rsp = req.GetResponse();
+                Stream istrm = rsp.GetResponseStream();
+                Var strresp = new StreamReader(istrm).ReadToEnd();
+		
+		
+		
+ 	2)if you Map dataset and response json data validate this Method WebApI POST
+	
+          System.Net.WebRequest req = System.Net.WebRequest.Create(URL);
                 req.Method = "POST";
                 req.ContentType = "application/json";
                 StreamWriter writer = new StreamWriter(req.GetRequestStream());
@@ -13,12 +27,7 @@ WebApI POST
                 Var strresp = new StreamReader(istrm).ReadToEnd();
 				
 				
-				
-				
-				
-				
-				
-		WebApI GET
+      3)  WebApI GET
 				
 		System.Net.WebRequest req = System.Net.WebRequest.Create(Url);
 		string encoded = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(UserName + ":" + Password));
@@ -41,7 +50,8 @@ WebApI POST
 		
 		
 		
-		
+	4) Web api web api config:
+	
 	Do you want appliaction/json format data in web-api ,you vcan define in Web Api Config below two lines
 		
 		
