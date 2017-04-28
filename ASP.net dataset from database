@@ -1,0 +1,72 @@
+
+dataset 
+Get the data from database using sp with parameters
+
+
+database with paramerts:
+   ds = DALayer.Qry_WithDataSet("APP_ADM_LoginCheck" + "" + "'" + obj.UserID + "','" + obj.Password + "','" + obj.ipaddress + "'");
+   
+   
+   
+   get the data asp.net code:
+   
+   
+       public static DataSet Qry_WithDataSet(string ProcWithParameter)
+        {
+            ErrorLog.ErrLog Errlog = new ErrLog();
+            try
+            {
+                if (GetConnStr() != null)
+                {
+                    SqlConnection MyCon = new SqlConnection(mstrPath);
+
+                    MyCon.Open();
+
+                    SqlCommand MyCommand = new SqlCommand(ProcWithParameter, MyCon);
+                    MyCommand.CommandTimeout = 0;
+
+                    SqlDataAdapter MyDataAdapter = new SqlDataAdapter();
+
+                    MyDataAdapter.SelectCommand = MyCommand;
+
+                    DataSet dtReturn = new DataSet();
+
+                    MyDataAdapter.Fill(dtReturn);
+
+                    MyCommand.Dispose();
+
+                    MyDataAdapter.Dispose();
+
+                    MyCon.Close();
+
+                    return dtReturn;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (SqlException sqlEx)
+            {
+                Errlog.ProiderNameErrLog("SQLErrlog", "DALayer", "Qry_WithDataSet", "Output" + "\n" + sqlEx);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Errlog.ProiderNameErrLog("SQLErrlog", "DALayer", "Qry_WithDataSet", "Output" + "\n" + ex);
+                return null;
+            }
+        }
+        
+        
+        Get data:
+        
+          if (ds.Tables[0].Rows.Count > 0)
+                    {
+                        staobj.GetLoginDetailsData = ds.Tables[0].AsEnumerable().Select(x => new GetLoginDetailsData
+                        {
+                            UserRefId = x.Field<int>("UserRefId"),
+                            UserName = x.Field<string>("UserName"),
+                            Operatorstatus = x.Field<int>("Operatorstatus"),
+                            VehicleType = x.Field<int>("VehicleType"),                  
+                        }).ToList();
